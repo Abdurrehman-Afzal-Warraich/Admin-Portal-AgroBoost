@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebaseConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import appLogo from '../../app-logo-3.png'
 
 
@@ -12,6 +12,7 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,7 +24,9 @@ function Login() {
       const adminDoc = await getDoc(doc(db, 'admins', userCredential.user.uid));
       
       if (adminDoc.exists()) {
-        navigate('/dashboard');
+        // Navigate to the attempted page or dashboard
+        const from = location.state?.from?.pathname || '/dashboard';
+        navigate(from, { replace: true });
       } else {
         await auth.signOut();
         setError('Unauthorized access. Admin privileges required.');
