@@ -1,14 +1,19 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { auth } from '../../firebaseConfig';
-import { useNavigate, Routes, Route, Link } from 'react-router-dom';
+import { useNavigate, Routes, Route, Link, useLocation } from 'react-router-dom';
 import SchemesList from '../schemes/SchemesList';
 import AddScheme from '../schemes/AddScheme';
 import UploadSchemes from '../schemes/UploadSchemes';
 import Dashboard from '../dashboard/Dashboard';
+import Login from '../auth/Login';
+import UsersList from '../users/UsersList';
+import Settings from '../settings/Settings';
+import AddNews from '../news/AddNews';
 
 function AdminLayout() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -26,27 +31,31 @@ function AdminLayout() {
           <h2>Admin Panel</h2>
         </div>
         <ul className="admin-menu">
-          <li className="menu-item">
+          <li className={`menu-item ${location.pathname === '/dashboard' ? 'active' : ''}`}>
             <Link to="/dashboard">Dashboard</Link>
           </li>
-          <li className="menu-item">
+          <li className={`menu-item ${location.pathname === '/schemes' ? 'active' : ''}`}>
             <Link to="/schemes">View Schemes</Link>
           </li>
-          <li className="menu-item">
+          <li className={`menu-item ${location.pathname === '/add-scheme' ? 'active' : ''}`}>
             <Link to="/add-scheme">Add Scheme</Link>
           </li>
-          <li className="menu-item">
+          <li className={`menu-item ${location.pathname === '/upload-schemes' ? 'active' : ''}`}>
             <Link to="/upload-schemes">Upload Schemes</Link>
           </li>
-          <li className="menu-item">Users</li>
-          <li className="menu-item">Settings</li>
+          <li className={`menu-item ${location.pathname === '/users' ? 'active' : ''}`}>
+            <Link to="/users">Users</Link>
+          </li>
+          <li className={`menu-item ${location.pathname === '/settings' ? 'active' : ''}`}>
+            <Link to="/settings">Settings</Link>
+          </li>
+          <li className={`menu-item ${location.pathname === '/add-news' ? 'active' : ''}`}>
+            <Link to="/add-news">Add News</Link>
+          </li>
         </ul>
       </nav>
       <main className="admin-main">
         <header className="admin-header">
-          <div className="admin-search">
-            <input type="search" placeholder="Search..." />
-          </div>
           <div className="admin-profile">
             <span>Welcome, {user.email}</span>
             <button onClick={handleLogout} className="logout-btn">
@@ -56,10 +65,14 @@ function AdminLayout() {
         </header>
         <div className="admin-content">
           <Routes>
+            <Route path="/" element={<Login />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/schemes" element={<SchemesList />} />
             <Route path="/add-scheme" element={<AddScheme />} />
             <Route path="/upload-schemes" element={<UploadSchemes />} />
+            <Route path="/users" element={<UsersList />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/add-news" element={<AddNews />} />
           </Routes>
         </div>
       </main>
