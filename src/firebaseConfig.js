@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 
@@ -24,6 +24,29 @@ const auth = getAuth(app);
 
 // Initialize Storage
 const storage = getStorage(app);
+
+// Function to get user statistics
+export const getUserStats = async () => {
+  try {
+    const usersRef = collection(db, 'users');
+    const usersSnapshot = await getDocs(usersRef);
+    
+    const users = usersSnapshot.docs.map(doc => doc.data());
+    const stats = users.reduce(
+      (acc, user) => {
+        acc[user.role.toLowerCase()]++;
+        acc.total++;
+        return acc;
+      },
+      { farmers: 0, buyers: 0, experts: 0, total: 0 }
+    );
+    
+    return stats;
+  } catch (error) {
+    console.error('Error fetching user statistics:', error);
+    throw error;
+  }
+};
 
 export { db, auth, storage };
 export default app;

@@ -9,6 +9,7 @@ import Login from '../auth/Login';
 import UsersList from '../users/UsersList';
 import Settings from '../settings/Settings';
 import AddNews from '../news/AddNews';
+import AgroCoinLayout from '../agrocoin/AgroCoinLayout';
 
 function AdminLayout() {
   const { user } = useAuth();
@@ -46,6 +47,9 @@ function AdminLayout() {
           <li className={`menu-item ${location.pathname === '/users' ? 'active' : ''}`}>
             <Link to="/users">Users</Link>
           </li>
+          <li className={`menu-item ${location.pathname === '/agrocoin' ? 'active' : ''}`}>
+            <Link to="/agrocoin">AgroCoin</Link>
+          </li>
           <li className={`menu-item ${location.pathname === '/settings' ? 'active' : ''}`}>
             <Link to="/settings">Settings</Link>
           </li>
@@ -71,6 +75,7 @@ function AdminLayout() {
             <Route path="/add-scheme" element={<AddScheme />} />
             <Route path="/upload-schemes" element={<UploadSchemes />} />
             <Route path="/users" element={<UsersList />} />
+            <Route path="/agrocoin/*" element={<AgroCoinLayout />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/add-news" element={<AddNews />} />
           </Routes>

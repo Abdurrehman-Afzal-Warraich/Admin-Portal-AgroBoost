@@ -13,6 +13,38 @@ function Dashboard() {
     totalRevenue: 0
   });
 
+  const [userCounts, setUserCounts] = useState({
+    farmers: 0,
+    buyers: 0,
+    experts: 0,
+    total: 0
+  });
+
+  useEffect(() => {
+    const fetchUserCounts = async () => {
+      try {
+        const usersRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersRef);
+
+        const users = usersSnapshot.docs.map(doc => doc.data());
+        const counts = users.reduce(
+          (acc, user) => {
+            acc[user.role.toLowerCase()]++;
+            acc.total++;
+            return acc;
+          },
+          { farmers: 0, buyers: 0, experts: 0, total: 0 }
+        );
+
+        setUserCounts(counts);
+      } catch (error) {
+        console.error('Error fetching user counts:', error);
+      }
+    };
+
+    fetchUserCounts();
+  }, []);
+
   const [userMetrics, setUserMetrics] = useState({
     farmers: 0,
     experts: 0,
