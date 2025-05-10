@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import appLogo from '../../app-logo-3.png';
 import { EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 
+
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +33,26 @@ function Login() {
         setError('Unauthorized access. Admin privileges required.');
       }
     } catch (error) {
-      setError(error.message);
+
+
+      if (error.code === 'auth/user-not-found') {
+        setError('User not found');
+      } else if (error.code === 'auth/wrong-password') {
+        setError('Incorrect password');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Too many requests. Please try again later.');
+      }
+      else if (error.code === 'auth/invalid-credential') {
+        setError('Invalid credentials');
+        
+      }
+
+      console.error('Login error:', error);
+
+      
+      
+      
+      
     } finally {
       setLoading(false);
     }

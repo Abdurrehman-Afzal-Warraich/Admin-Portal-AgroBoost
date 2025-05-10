@@ -10,6 +10,7 @@ import UsersList from '../users/UsersList';
 import Settings from '../settings/Settings';
 import AddNews from '../news/AddNews';
 import AgroCoinLayout from '../agrocoin/AgroCoinLayout';
+import './Admin-Style.css'; // Import your CSS file for styling
 
 function AdminLayout() {
   const { user } = useAuth();
@@ -53,13 +54,14 @@ function AdminLayout() {
           <li className={`menu-item ${location.pathname === '/settings' ? 'active' : ''}`}>
             <Link to="/settings">Settings</Link>
           </li>
-          <li className={`menu-item ${location.pathname === '/add-news' ? 'active' : ''}`}>
-            <Link to="/add-news">Add News</Link>
-          </li>
         </ul>
       </nav>
       <main className="admin-main">
         <header className="admin-header">
+          <div className="admin-logo-header">
+            <img src="/app-logo-wo-text.png" alt="AgroBoost Logo" className="header-logo" />
+            <span className="app-name">AgroBoost</span>
+          </div>
           <div className="admin-profile">
             <span>Welcome, {user.email}</span>
             <button onClick={handleLogout} className="logout-btn">

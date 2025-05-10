@@ -1,0 +1,241 @@
+/* Admin Layout Styles */
+:root {
+  --primary-color: #4caf50;
+  --primary-dark: #388e3c;
+  --primary-light: #c8e6c9;
+  --secondary-color: #f5f5f5;
+  --text-dark: #333333;
+  --text-light: #ffffff;
+  --text-muted: #757575;
+  --border-color: #e0e0e0;
+  --danger-color: #f44336;
+  --sidebar-width: 250px;
+  --header-height: 70px;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  color: var(--text-dark);
+}
+
+/* Admin Container */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: var(--sidebar-width);
+  background-color: white;
+  box-shadow: var(--shadow);
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  transition: var(--transition);
+  z-index: 1000;
+}
+
+.admin-logo {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--header-height);
+}
+
+.admin-logo h2 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.admin-menu {
+  list-style: none;
+  padding: 20px 0;
+}
+
+.menu-item {
+  margin-bottom: 5px;
+}
+
+.menu-item a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: var(--transition);
+  border-left: 3px solid transparent;
+}
+
+.menu-item a:hover {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border-left-color: var(--primary-color);
+}
+
+.menu-item.active a {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border-left-color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Main Content Area */
+.admin-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  transition: var(--transition);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header h1 {
+    font-size: 1.5rem;
+    color: var(--primary-dark);
+    margin-right: auto; /* Pushes the element to the left */
+}
+
+
+.admin-logo-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  left:0
+}
+
+.header-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.app-name {
+  margin-bottom: 10px;  
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+
+.admin-profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-profile span {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.logout-btn {
+  background-color: transparent;
+  color: var(--danger-color);
+  border: 1px solid var(--danger-color);
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+
+.logout-btn:hover {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.admin-content {
+  padding: 30px;
+  background-color: #f9f9f9;
+  min-height: calc(100vh - var(--header-height));
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    width: 240px;
+  }
+
+  .admin-sidebar.active {
+    transform: translateX(0);
+  }
+
+  .admin-main {
+    margin-left: 0;
+  }
+
+  .admin-header {
+    padding: 0 15px;
+  }
+
+  .admin-content {
+    padding: 20px;
+  }
+
+  /* Add a hamburger menu button for mobile */
+  .menu-toggle {
+    display: block;
+    position: absolute;
+    left: 15px;
+    top: 23px;
+    cursor: pointer;
+  }
+}
+
+/* Additional Styling for Menu Items */
+.menu-item a::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background-color: var(--text-muted);
+  border-radius: 50%;
+  margin-right: 12px;
+  transition: var(--transition);
+}
+
+.menu-item.active a::before,
+.menu-item a:hover::before {
+  background-color: var(--primary-color);
+}
+
+/* Animation for hover effects */
+.menu-item a {
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-item a::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.menu-item a:hover::after {
+  width: 100%;
+}

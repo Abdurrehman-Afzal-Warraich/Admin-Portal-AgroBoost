@@ -169,6 +169,8 @@
   gap: 8px;
 }
 
+
+
 .delete-all-btn:hover:not(:disabled) {
   background-color: #c82333;
   transform: translateY(-2px);
@@ -522,7 +524,7 @@
   align-items: center;
   justify-content: center;
   padding: 60px;
-  background: #f8f9fa;
+  background: #c1edc5;
   position: relative;
   overflow: hidden;
 }
@@ -558,7 +560,7 @@
 }
 
 .login-form h2 {
-  color: #333;
+  color: #72d080;
   margin-bottom: 40px;
   font-size: 28px;
   text-align: center;
@@ -604,7 +606,7 @@
 }
 
 .login-btn {
-  width: 100%;
+  width: 70%;
   padding: 16px;
   background: linear-gradient(135deg, #8A2BE2 0%, #9400D3 100%);
   color: white;
@@ -617,7 +619,7 @@
   margin-top: 20px;
   position: relative;
   overflow: hidden;
-  left: 40px;
+  margin-left: 40px;
 }
 
 .login-btn::before {
@@ -1694,3 +1696,5 @@ input:checked + .slider:before {
   margin-bottom: 20px;
   font-size: 14px;
 }
+
+

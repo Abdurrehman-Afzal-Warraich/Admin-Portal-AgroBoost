@@ -1,85 +1,95 @@
-import { useState, useEffect } from 'react';
-import { collection, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebaseConfig';
+"use client"
+
+import { useState } from "react"
+import { useAllUsers } from "../../components/dashboard/hooks/use-firebase-data"
+import "./users-list-styles.css"
 
 function UsersList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'detail'
+  const { users, loading, deleteUser } = useAllUsers()
+  const [searchTerm, setSearchTerm] = useState("")
+  const [roleFilter, setRoleFilter] = useState("all")
+  const [statusFilter, setStatusFilter] = useState("all")
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [viewMode, setViewMode] = useState("list")
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+const formatDate = (timestamp) => {
+  if (!timestamp) return "Unknown";
+  
+  try {
+    // Handle Firestore timestamp format
+    const date = timestamp.seconds ? 
+      new Date(timestamp.seconds * 1000) : // Convert Firestore timestamp
+      new Date(timestamp); // Handle regular timestamp
 
-  const fetchUsers = async () => {
-    try {
-      const usersRef = collection(db, 'users');
-      const snapshot = await getDocs(usersRef);
-      const usersList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUsers(usersList);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      setLoading(false);
-    }
-  };
+    return date.toLocaleString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      
+    });
+  } catch (error) {
+    console.error("Date formatting error:", error);
+    console.error("Timestamp value:", timestamp);
+    return "Invalid Date";
+  }
+};
 
-  const handleStatusChange = async (userId, newStatus) => {
-    try {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, { status: newStatus });
-      setUsers(users.map(user => 
-        user.id === userId ? { ...user, status: newStatus } : user
-      ));
-    } catch (error) {
-      console.error('Error updating user status:', error);
-    }
-  };
 
-  const handleDeleteUser = async (userId) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await deleteDoc(doc(db, 'users', userId));
-        setUsers(users.filter(user => user.id !== userId));
-      } catch (error) {
-        console.error('Error deleting user:', error);
+
+  // Handle user deletion
+  const handleDeleteUser = async (userId, role) => {
+  try {
+    const success = await deleteUser(userId, role);
+    if (success) {
+      if (selectedUser && selectedUser.id === userId) {
+        setSelectedUser(null);
+        setViewMode("list");
       }
+      alert("User deleted successfully!");
+    } else {
+      alert("Failed to delete user. Please try again.");
     }
-  };
+  } catch (error) {
+    console.error("Error in handleDeleteUser:", error);
+    alert(`Error deleting user: ${error.message}`);
+  }
+};
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = (
+  // Filter users based on search term and filters
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.phone?.includes(searchTerm)
-    );
-    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-    const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+    const matchesRole = roleFilter === "all" || user.role === roleFilter
+    const matchesStatus = statusFilter === "all" || user.status === statusFilter
+    return matchesSearch && matchesRole && matchesStatus
+  })
 
+  // User detail view component
   const UserDetailView = ({ user }) => (
     <div className="user-detail">
-      <button 
-        onClick={() => setViewMode('list')} 
-        className="back-btn"
-      >
-        ← Back to Users List
+      <button onClick={() => setViewMode("list")} className="back-btn">
+        Back to Users List
       </button>
-      
+
       <div className="user-profile">
         <div className="profile-header">
-          <h2>{user.name}</h2>
-          <span className={`status-badge ${user.status}`}>
-            {user.status}
-          </span>
+          <div className="user-avatar">
+            <div className="avatar-placeholder"></div>
+          </div>
+          <div className="user-info">
+            <h2>{user.name || "Unknown User"}</h2>
+            <div className="user-badges">
+              
+              <span className={`role-badge ${user.role}`}>
+                {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+              </span>
+            </div>
+          </div>
+          <button onClick={() => handleDeleteUser(user.id, user.role)} className="delete-user-btn">
+            Delete User
+          </button>
         </div>
 
         <div className="profile-sections">
@@ -87,61 +97,104 @@ function UsersList() {
             <h3>Basic Information</h3>
             <div className="info-grid">
               <div className="info-item">
-                <label>Email:</label>
-                <span>{user.email}</span>
+                <label>Email</label>
+                <span>{user.email || "Not provided"}</span>
               </div>
               <div className="info-item">
-                <label>Phone:</label>
-                <span>{user.phone}</span>
+                <label>Phone</label>
+                <span>{user.phoneNumber || "Not provided"}</span>
               </div>
               <div className="info-item">
-                <label>Role:</label>
-                <span>{user.role}</span>
+                <label>Joined</label>
+                <span>{formatDate(user.createdAt)}</span>
               </div>
               <div className="info-item">
-                <label>Joined:</label>
-                <span>{new Date(user.registrationDate).toLocaleDateString()}</span>
+                <label>Agro Coins</label>
+                <span>{user.coins || "0"}</span>
               </div>
             </div>
           </div>
 
-          <div className="profile-section">
-            <h3>Account Statistics</h3>
-            <div className="info-grid">
-              <div className="info-item">
-                <label>Coin Balance:</label>
-                <span>{user.coinBalance || 0} coins</span>
-              </div>
-              <div className="info-item">
-                <label>Total Transactions:</label>
-                <span>{user.transactions?.length || 0}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="profile-section">
-            <h3>Recent Activity</h3>
-            <div className="activity-list">
-              {user.recentActivity?.map((activity, index) => (
-                <div key={index} className="activity-item">
-                  <span className="activity-date">
-                    {new Date(activity.date).toLocaleDateString()}
-                  </span>
-                  <span className="activity-description">
-                    {activity.description}
+          {user.role === "farmer" && (
+            <div className="profile-section">
+              <h3>Farmer Details</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <label>Address</label>
+                  <span>{user.address || "Not specified"}</span>
+                </div>
+                <div className="info-item">
+                  <label>City</label>
+                  <span>{user.city || "Not specified"}</span>
+                </div>
+                <div className="info-item">
+                  <label>Location</label>
+                  <span>
+                    {user.location
+                      ? `Lat: ${user.location.latitude}, Long: ${user.location.longitude}`
+                      : "Not specified"}
                   </span>
                 </div>
-              )) || <p>No recent activity</p>}
+                <div className="info-item">
+                  <label>Budget</label>
+                  <span>{user.budget ? `₹${user.budget}` : "Not specified"}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {user.role === "expert" && (
+            <div className="profile-section">
+              <h3>Expert Details</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <label>Specialization</label>
+                  <span>{user.specialization || "Not specified"}</span>
+                </div>
+                <div className="info-item">
+                  <label>Experience</label>
+                  <span>{user.experienceYears ? `${user.experienceYears} years` : "Not specified"}</span>
+                </div>
+                <div className="info-item">
+                  <label>Rating</label>
+                  <span>{user.rating ? `${user.rating}/5 (${user.numberOfRatings} ratings)` : "No ratings"}</span>
+                </div>
+                <div className="info-item">
+                  <label>Consultation Hours</label>
+                  <span>
+                    {user.consultationHours
+                      ? `${user.consultationHours.start} - ${user.consultationHours.end}`
+                      : "Not specified"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {user.role === "buyer" && (
+            <div className="profile-section">
+              <h3>Buyer Details</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <label>Address</label>
+                  <span>{user.address || "Not specified"}</span>
+                </div>
+                <div className="info-item">
+                  <label>City</label>
+                  <span>{user.city || "Not specified"}</span>
+                </div>
+                
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
-  );
+  )
 
   return (
     <div className="users-container">
-      {viewMode === 'list' ? (
+      {viewMode === "list" ? (
         <>
           <div className="users-header">
             <h1>User Management</h1>
@@ -155,85 +208,69 @@ function UsersList() {
                   className="search-input"
                 />
               </div>
-              <select
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value)}
-                className="filter-select"
-              >
+              <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="filter-select">
                 <option value="all">All Roles</option>
                 <option value="farmer">Farmers</option>
                 <option value="expert">Experts</option>
                 <option value="buyer">Buyers</option>
               </select>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+              
             </div>
           </div>
 
           {loading ? (
-            <div className="loading">Loading users...</div>
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Loading users...</p>
+            </div>
           ) : (
-            <div className="users-table">
-              <table>
+            <div className="users-table-container">
+              <table className="users-table">
                 <thead>
                   <tr>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Role</th>
-                    <th>Registration Date</th>
-                    <th>Status</th>
+                    
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map(user => (
-                    <tr key={user.id}>
-                      <td>{user.name}</td>
-                      <td>{user.email}</td>
-                      <td>{user.phone}</td>
-                      <td>
-                        <span className={`role-badge ${user.role}`}>
-                          {user.role}
-                        </span>
-                      </td>
-                      <td>{new Date(user.registrationDate).toLocaleDateString()}</td>
-                      <td>
-                        <select
-                          value={user.status}
-                          onChange={(e) => handleStatusChange(user.id, e.target.value)}
-                          className={`status-select ${user.status}`}
-                        >
-                          <option value="active">Active</option>
-                          <option value="inactive">Inactive</option>
-                        </select>
-                      </td>
-                      <td className="action-buttons">
-                        <button 
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setViewMode('detail');
-                          }} 
-                          className="view-btn"
-                        >
-                          View
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteUser(user.id)} 
-                          className="delete-btn"
-                        >
-                          Delete
-                        </button>
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="empty-cell">
+                        No users found matching your criteria
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredUsers.map((user) => (
+                      <tr key={`${user.role}-${user.id}`}>
+                        <td>{user.name || "Unknown"}</td>
+                        <td>{user.email || "Not provided"}</td>
+                        <td>{user.phoneNumber || "Not provided"}</td>
+                        <td>
+                          <span className={`role-badge ${user.role}`}>
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          </span>
+                        </td>
+                        <td className="action-buttons">
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user)
+                              setViewMode("detail")
+                            }}
+                            className="view-btn"
+                          >
+                            View
+                          </button>
+                          <button onClick={() => handleDeleteUser(user.id, user.role)} className="delete-btn">
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -243,7 +280,7 @@ function UsersList() {
         <UserDetailView user={selectedUser} />
       )}
     </div>
-  );
+  )
 }
 
-export default UsersList; 
+export default UsersList
